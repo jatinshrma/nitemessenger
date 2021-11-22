@@ -1,0 +1,224 @@
+/* --------------------- Contact layout --------------------- */
+
+#contact-dpContainer {
+    width: 65px;
+    height: 65px;
+    overflow: hidden;
+    margin: 10px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#contact-dp {
+    /* height: 65px; */
+    width: 100%;
+}
+
+.ContactItem {
+    padding-left: 5px;
+    box-sizing: border-box;
+    color: white;
+    background: #151419;
+    border: none;
+}
+
+/* Contact-Menu */
+
+#menu-dots {
+    box-sizing: border-box;
+    width: 76px;
+    background: #151419;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* #menu-dots:hover{
+    background: black;
+    transition: all 0.8s ease-out ;
+} */
+
+#contactMenu {
+    background-color: #1c1c1c;
+}
+
+.ContactItem:hover, #menu-dots:hover {
+    background: black;
+    transition: all 0.8s ease-out;
+}
+
+#contactMenu * {
+    color: white;
+}
+
+#cmItemDel:hover {
+    color: white;
+    background-color: rgb(184, 0, 0);
+}
+
+#cmItem:hover {
+    color: white;
+    background-color: black;
+}
+
+/* --------------------- Search-bar --------------------- */
+
+#home-search-input {
+    padding: 13px 20px;
+    border-radius: 0;
+    background: #151419;
+}
+
+#home-search-input:focus {
+    background-color: #050507;
+    transition: background .3s ease-in;
+}
+
+/* --------------------- Tabs-bar --------------------- */
+
+.tabs-bar {
+    display: flex;
+    color: white;
+    background-color: #151419;
+}
+
+.tabs {
+    width: 100%;
+    height: fit-content;
+    display: inline-block;
+    color: white;
+    text-align: center;
+    font-size: large;
+    padding: 15px 0;
+}
+
+.tabs:hover {
+    background: black;
+    transition: all 0.8s ease-out;
+}
+
+.tabsIco {
+    width: 25px;
+}
+
+#mid-tab {
+    border-right: .6px solid #525252;
+}
+
+/* --------------------- Profile-Page --------------------- */
+
+#profile_page_dp_div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    height: auto;
+    max-height: 80vh;
+    /* max-height: 100%; */
+}
+
+#bio-length {
+    font-size: medium;
+}
+
+#profile_page_dp {
+    height: auto;
+    width: 100%;
+}
+
+/* user details-List */
+
+.list-group-item {
+    align-items: center;
+}
+
+.list-keys {
+    display: contents;
+    width: 90px;
+}
+
+.list-values {
+    outline: none;
+    border: none;
+    display: flex;
+    justify-content: flex-end;
+    padding-left: 10px;
+}
+
+.list-values, .list-value-bio {
+    color: #a6a6ab;
+    width: 100%;
+}
+
+.list-values>input {
+    width: auto;
+    max-width: 500px;
+}
+
+.file-input {
+    display: none;
+}
+
+/* RESPONSIVE SCREEN STYLING */
+
+@media screen and (max-width: 480px) {
+    div, h5, p {
+        font-size: 16px;
+    }
+    #home-search-input {
+        font-size: small;
+        padding: 13px 20px;
+        border-radius: 0;
+        background: #151419;
+    }
+    .navbar {
+        padding: 0;
+    }
+    .navbar-brand {
+        padding: 5px 0;
+        font-size: 1rem;
+    }
+    .btn {
+        border-radius: 20px;
+        margin: 10px!important;
+    }
+    #contact-dpContainer {
+        width: 40px;
+        height: 40px;
+    }
+    #menu-dots>div>img {
+        width: 25px!important;
+    }
+    .tabs {
+        padding: 10px 0;
+    }
+    .tabsIco {
+        height: 20px;
+    }
+    .list-group-item {
+        align-items: center;
+        padding: 5px 8px;
+    }
+    .card-body {
+        padding: 5px;
+    }
+    .list-value-bio {
+        font-size: 14px;
+        padding: 0;
+    }
+    .list-values>input, .bio-textarea {
+        padding: 5px 5px!important;
+        font-size: 14px;
+    }
+    #bio-length {
+        font-size: 13px;
+    }
+    #contactMenu * {
+        font-size: 14px;
+    }
+    .dropdown-menu{
+        min-width: 5rem;
+    }
+}

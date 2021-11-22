@@ -1,0 +1,244 @@
+/* --------------------- Nav bar --------------------- */
+
+#messenger-nav {
+   display: flex;
+   align-items: center;
+   justify-content: flex-start;
+   position: fixed;
+   width: 100%;
+}
+
+.nav-profilePic {
+   width: 100%;
+}
+
+.nav-dpContainer {
+   width: 50px;
+   height: 50px;
+   overflow: hidden;
+   margin: 10px;
+   border-radius: 50%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+/* --------------------- Chat Divs --------------------- */
+
+.date-elements{
+   margin: 20px;
+   color: grey;
+}
+
+#chatContainer {
+   margin-bottom: 70px;
+   padding-top: 80px;
+}
+
+.sentTxtDiv {
+   justify-content: flex-end;
+}
+
+.recTxt {
+   overflow-wrap: anywhere;
+   color: white;
+   background: #242424;
+   border-radius: 1rem;
+   padding: 10px 20px;
+   margin: 5px 0;
+   max-width: 80%;
+}
+
+.sentTxt {
+   overflow-wrap: anywhere;
+   background: #2d52dc;
+   color: white;
+   border-radius: 1rem;
+   padding: 10px 20px;
+   max-width: 80%;
+   margin: 5px 0;
+}
+
+#chatTime {
+   margin: -8px 0;
+   margin-top: -4px;
+   text-align: end;
+   font-size: medium;
+   color: #b1b1b1;
+}
+
+.chatOpt {
+   position: relative;
+   left: 48%;
+}
+
+/* --------------------- emoji --------------------- */
+
+#emojiBtn {
+   background: black;
+   padding: 0 12px;
+   border: none;
+   display: flex;
+   align-items: center;
+}
+
+#emojiBtn> img{
+   width: 25px;
+   margin: auto;
+}
+
+#emojiContainer {
+   width: fit-content;
+   position: fixed;
+   bottom: 60px;
+   margin: 0 10px;
+}
+
+aside.emoji-picker-react {
+   background: #000;
+   border: none;
+   box-shadow: none;
+}
+
+.emoji-picker-react input.emoji-search {
+   background: #000000;
+   border: #000;
+}
+
+.emoji-picker-react input.emoji-search:focus {
+   background: #000000;
+   border: #000;
+}
+
+.emoji-picker-react .emoji-group:before {
+   background: rgb(0 0 0 / 95%);
+}
+
+.emoji-picker-react .emoji-categories {
+   background: #456cff;
+}
+
+/* --------------------- Bottom Area --------------------- */
+
+.bottomDiv {
+   width: 100%;
+   position: fixed;
+   bottom: 0;
+   background: #161616;
+}
+
+.bottomInnerDiv {
+   width: 100vw;
+   margin: 5px 5px;
+   border-radius: 25px;
+   background: none;
+   overflow: hidden;
+}
+
+#txtInput {
+   background: black;
+   color: white;
+   width: 100%;
+   max-height: 200px;
+   border: none;
+   outline: none;
+   padding: 12px 0;
+   overflow: hidden;
+   resize: none;
+}
+
+#sendBtn {
+   color: white;
+   background: #2d52dc;
+   border: none;
+   outline: none;
+   margin: auto 5px 10px 0;
+   padding: 5px 12px;
+   border-radius: 40px;
+}
+
+/* --------------------- Typing-dots --------------------- */
+
+.dots-cont {
+   position: fixed;
+   bottom: 58px;
+   width: 100%;
+}
+
+.dot {
+   width: 12px;
+   height: 12px;
+   background: #585858;
+   display: inline-block;
+   border-radius: 50%;
+   right: 0px;
+   bottom: 0px;
+   margin: 0px 2.5px;
+   position: relative;
+   animation: jump 1s infinite;
+}
+
+.dots-cont:hover>.dot {
+   /* position: relative; */
+   /* bottom: 0px; */
+   animation: none;
+}
+
+.dots-cont .dot-1 {
+   -webkit-animation-delay: 100ms;
+   animation-delay: 100ms;
+}
+
+.dots-cont .dot-2 {
+   -webkit-animation-delay: 200ms;
+   animation-delay: 200ms;
+}
+
+.dots-cont .dot-3 {
+   -webkit-animation-delay: 300ms;
+   animation-delay: 300ms;
+}
+
+@keyframes jump {
+   0% {
+      bottom: 0px;
+   }
+   20% {
+      bottom: 5px;
+   }
+   40% {
+      bottom: 0px;
+   }
+}
+
+@media screen and (max-width: 480px) {
+   #chatContainer{
+      margin-bottom: 57px;
+   }
+   .recTxt{
+      overflow-wrap: anywhere;
+      max-width: 80%;
+      font-size: 14px;
+      padding: 5px 10px 11px 10px;
+   }
+   .sentTxt{
+      overflow-wrap: anywhere;
+      max-width: 80%;
+      font-size: 14px;
+      padding: 5px 10px 11px 10px;
+   }
+   span ,div{
+      font-size: small;
+   }
+   #chatTime{
+      font-size: 12px;
+   }
+   #sendBtn{
+      font-size: small;
+      padding: 8px 12px;
+   }
+   .nav-dpContainer{
+      width: 38px;
+      height: 38px;
+   }
+}

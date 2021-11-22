@@ -1,0 +1,51 @@
+{
+  "name": "nite-messenger",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "axios": "^0.24.0",
+    "bootstrap": "^5.1.3",
+    "concurrently": "^6.3.0",
+    "emoji-picker-react": "^3.4.8",
+    "query-string": "^7.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.3.0",
+    "react-scripts": "4.0.3",
+    "socket.io-client": "^4.3.2",
+    "web-vitals": "^1.1.2"
+  },
+  "scripts": {
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "frontend": "react-scripts start",
+    "eject": "react-scripts eject",
+    "backend": "nodemon ../backend/index.js",
+    "socket": "nodemon ../backend/socket.js",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\" \"npm run socket\" "
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14"
+  }
+}
