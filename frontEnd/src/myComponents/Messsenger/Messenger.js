@@ -122,8 +122,8 @@ const Messenger = (props) => {
 
         const ref = inputRef.current;
         ref.focus();
-        const start = inputRef.current.substring(0, ref.selectionStart);
-        const end = inputRef.current.substring(ref.selectionStart);
+        const start = inputRef.current.value.substring(0, ref.selectionStart);
+        const end = inputRef.current.value.substring(ref.selectionStart);
         const text = start + emojiObject.emoji + end;
         inputRef.current.value = text;
         setCursorLocation(start.length + 2);
