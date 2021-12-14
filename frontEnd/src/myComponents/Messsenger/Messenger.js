@@ -73,7 +73,7 @@ const Messenger = (props) => {
         getMessages(friend, user);
 
         // Fetch friend's profile
-        // getFriendsProfile(friend, user);
+        getFriendsProfile(friend, user);
 
         // Scroll to the bottom
         window.scrollTo(0, window.document.body.scrollHeight);
@@ -174,7 +174,7 @@ const Messenger = (props) => {
     var count = 0;
     return (
         <>
-            <ChatNav friend={friendsProfile} activeStatus={activeStatus} />
+            <ChatNav user={user} friend={friendsProfile} activeStatus={activeStatus} />
             <div id="chatContainer" className="px-2">
                 {chat.map(element => {
                     count++;

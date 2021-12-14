@@ -62,7 +62,7 @@ const ContactsList = () => {
             <div className="bg-black w-100">
                 <ul className="d-block m-0 p-0">
                     {!seachInput && users.map(element => {
-                        return <Contact key={element._id} user={element} params={urlparam} />;
+                        return <Contact key={element._id} user={element} params={urlparam} currentUser={user}/>;
                     })}
                     {seachInput && users.map(element => {
                         let name = element.name.toLowerCase();

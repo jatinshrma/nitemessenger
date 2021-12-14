@@ -4,7 +4,7 @@ import doticon from '../img/3dots.svg';
 
 const ContactItem = (props) => {
 
-    const { user, params } = props;
+    const { user, params, currentUser } = props;
     const dp = `${process.env.REACT_APP_USER_DP}/${user.dp_id}`;
     const defaultDP = process.env.REACT_APP_DEFAULT_DP;
     return (
@@ -15,7 +15,7 @@ const ContactItem = (props) => {
                         <img id="contact-dp" src={user.dp_id.length > 14 ? dp : defaultDP} alt="Profile" />
                     </div>
                     <div className="me-auto" style={{ margin: "auto 20px" }}>
-                        <div>{user.name}</div>
+                        <div>{currentUser === user.username ? "Me" : user.name}</div>
                         {user.username}
                     </div>
                 </div>
