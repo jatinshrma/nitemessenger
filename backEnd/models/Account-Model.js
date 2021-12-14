@@ -9,6 +9,8 @@ const AccountSchema = new Schema({
     email: { type: String, required: true, unique: true },
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    friends: { type: Array, default:[] },
+    blocked: { type: Array, default:[] },
     date: { type: Date, default: Date.now }
 });
 module.exports = mongoose.model('account', AccountSchema);

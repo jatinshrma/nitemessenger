@@ -3,7 +3,7 @@ import './Messenger.css'
 // import doticon from '../img/3dots.svg'
 
 const ChatItem = (props) => {
-    const { msg, chatClass, chat, date } = props;
+    const { msg, chatClass, showStatus, chat, date, messageStatus } = props;
     let align;
     if (chatClass === "sentTxt") {
         align = "end"
@@ -19,7 +19,7 @@ const ChatItem = (props) => {
 
     return (
         <div>
-            { date && <div className="text-center date-elements">{date}</div>}
+            {date && <div className="text-center date-elements">{date}</div>}
             <div className={`${chatClass}Div d-flex`}>
                 <span className={chatClass} id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" >
                     {msg}
@@ -30,6 +30,8 @@ const ChatItem = (props) => {
                     <button className="dropdown-item" id="cmItemDel">Unsend</button>
                 </div>
             </div>
+            {showStatus && <div id="messageStatus">{messageStatus ? "seen" : chat.status}</div>}
+            {/* {messageStatus && <div id="messageStatus">seen</div>} */}
         </div>
     )
 }

@@ -5,8 +5,8 @@ const MssgState = (props) => {
 
     const [chat, setChat] = useState([]);
     const [users, setUsers] = useState([]);
-    const [friendsProfile, setFriendsProfile] = useState([])
-    const host =  process.env.REACT_APP_SERVER;
+    const [friendsProfile, setFriendsProfile] = useState([]);
+    const host = process.env.REACT_APP_SERVER;
 
     const getMessages = async (friend, user) => {
 
@@ -22,29 +22,43 @@ const MssgState = (props) => {
     }
 
     // Send
-    const sendMessage = async (message, friend, user) => {
+    const sendMessage = async (message, friend, user, status) => {
         const response = await fetch(`${host}/sendmessage/${friend}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Token': localStorage.getItem(user),
             },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ message, status })
         });
         const content = await response.json();
-        setChat(chat.concat(content))
+        return content
     };
 
     // Delete
     const unsend = async (id, user) => {
 
-        await fetch(`${host}/unsendmessage/${id}`, {
+        await fetch(`${host}/unsendmessage`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'Token': localStorage.getItem(user),
+                'id': id,
             },
         });
+    };
+
+    // Status Update
+    const status_update = async (id, user) => {
+
+        //     await fetch(`${host}/status/seen`, {
+        //         method: 'PUT',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'Token': localStorage.getItem(user),
+        //             'id': id,
+        //         },
+        //     });
     };
 
     const fetchUsers = async () => {
@@ -72,7 +86,7 @@ const MssgState = (props) => {
 
     return (
 
-        <MssgContext.Provider value={{ chat, setChat, getMessages, sendMessage, unsend, users, setUsers, fetchUsers, friendsProfile, getFriendsProfile }}>
+        <MssgContext.Provider value={{ chat, setChat, getMessages, sendMessage, unsend, status_update, users, setUsers, fetchUsers, friendsProfile, getFriendsProfile }}>
             {props.children}
         </MssgContext.Provider>
     )

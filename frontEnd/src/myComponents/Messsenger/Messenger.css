@@ -25,7 +25,7 @@
 
 /* --------------------- Chat Divs --------------------- */
 
-.date-elements{
+.date-elements {
    margin: 20px;
    color: grey;
 }
@@ -68,8 +68,14 @@
 }
 
 .chatOpt {
-   position: relative;
+   position: absolute;
    left: 48%;
+}
+
+#messageStatus {
+   text-align: end;
+   padding-right: 20px;
+   color: #b1b1b1;
 }
 
 /* --------------------- emoji --------------------- */
@@ -82,7 +88,7 @@
    align-items: center;
 }
 
-#emojiBtn> img{
+#emojiBtn>img {
    width: 25px;
    margin: auto;
 }
@@ -136,6 +142,7 @@ aside.emoji-picker-react {
 }
 
 #txtInput {
+   white-space: pre-wrap;
    background: black;
    color: white;
    width: 100%;
@@ -203,41 +210,49 @@ aside.emoji-picker-react {
    0% {
       bottom: 0px;
    }
+
    20% {
       bottom: 5px;
    }
+
    40% {
       bottom: 0px;
    }
 }
 
 @media screen and (max-width: 480px) {
-   #chatContainer{
+   #chatContainer {
       margin-bottom: 57px;
    }
-   .recTxt{
+
+   .recTxt {
       overflow-wrap: anywhere;
       max-width: 80%;
       font-size: 14px;
       padding: 5px 10px 11px 10px;
    }
-   .sentTxt{
+
+   .sentTxt {
       overflow-wrap: anywhere;
       max-width: 80%;
       font-size: 14px;
       padding: 5px 10px 11px 10px;
    }
-   span ,div{
+
+   span, div {
       font-size: small;
    }
-   #chatTime{
+
+   #chatTime {
       font-size: 12px;
    }
-   #sendBtn{
+
+   #sendBtn {
       font-size: small;
       padding: 8px 12px;
    }
-   .nav-dpContainer{
+
+   .nav-dpContainer {
       width: 38px;
       height: 38px;
    }

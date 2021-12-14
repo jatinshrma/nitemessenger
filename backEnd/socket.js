@@ -40,14 +40,16 @@ io.on("connection", socket => {
     })
 
     // send & get message
-    socket.on("sendMessage", async ({ sender, reciever, message, chatLength, date }) => {
+    socket.on("sendMessage", async (message, receiver) => {
 
-        const user = await getUser(reciever);
-        io.to(user.socketId).emit("getMessage", {
-            sender,
-            reciever,
-            message,
-            date
-        });
+        const user = await getUser(receiver);
+        io.to(user.socketId).emit("getMessage", message);
+    });
+
+    // Set typing status
+    socket.on("typing", async (isTyping, receiver) => {
+
+        const user = await getUser(receiver);
+        io.to(user.socketId).emit("isFriendTyping", isTyping);
     });
 });

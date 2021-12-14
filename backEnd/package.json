@@ -4,6 +4,8 @@
   "description": "a messenger on-web application",
   "main": "index.js",
   "scripts": {
+    "backend": "nodemon index.js",
+    "socket": "nodemon socket.js",
     "start": "concurrently \"nodemon index.js\" \"nodemon socket.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -135,7 +135,7 @@ router.post('/profile', getProfile, async (req, res) => {
 });
 
 // Route description : Get user profile by username from database.
-router.post('/profile/:username', getProfile, async (req, res) => {
+router.post('/profile/:username', async (req, res) => {
 
     try {
         const user = await Accounts.findOne({ username: req.params.username }).select("-_id -password -email")
@@ -185,12 +185,143 @@ router.put('/profile/update',
             if (bio) { updatedProfile.bio = bio };
             if (email) { updatedProfile.email = email };
 
-            user = await Accounts.findOneAndUpdate({"_id":req.user.id}, { $set: updatedProfile }, {new: true, useFindAndModify: false});
+            user = await Accounts.findOneAndUpdate({ "_id": req.user.id }, { $set: updatedProfile }, { new: true, useFindAndModify: false });
             res.send(user);
         } catch (error) {
             res.status(500).json({ message: "Some error occurred", error: error.message })
         }
     }
 );
+
+// Route description : Add new friend.
+router.put('/handshake/:friend', getProfile, async (req, res) => {
+
+    const userID = await req.user.id;
+    const friend = req.params.friend;
+    try {
+        // Find user in the database
+        let user = await Accounts.findById(userID);
+        const friendExits = await Accounts.exists({ "username": friend });
+
+        if (!friendExits) { return res.status(404).json(`No user with username @${friend} exists in the database.`) }
+
+        if (user.friends.includes(friend)) { return res.json(`You and @${friend} are already friends.`) }
+        let userFriends = { friends: [] };
+        userFriends.friends = userFriends.friends.concat(user.friends);
+        userFriends.friends = userFriends.friends.concat(friend);
+
+        user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: userFriends }, { new: true, useFindAndModify: false });
+        res.send(user);
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+});
+
+// Route description : unfriend.
+router.put('/goodbye/:friend', getProfile, async (req, res) => {
+
+    const userID = await req.user.id
+    const friend = req.params.friend;
+    try {
+        // Find user in the database
+        let user = await Accounts.findById(userID);
+
+        if (!user.friends.includes(friend)) { return res.json(`You and @${friend} are not friends.`) }
+
+        function unFriend(friend_username) {
+            return friend_username != friend;
+        }
+
+        let userFriends = { friends: [] };
+        userFriends.friends = userFriends.friends.concat(user.friends);
+        userFriends.friends = userFriends.friends.filter(unFriend);
+        console.log('worked till here.')
+
+        user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: userFriends }, { new: true, useFindAndModify: false });
+        res.send(user);
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+});
+
+// Route description : friendlist.
+router.get('/friendlist/:user/:friend', async (req, res) => {
+
+    const username = req.params.user;
+    const friendname = req.params.friend;
+    try {
+        // Find user in the database
+        let user = await Accounts.find({ "username": username }).select("-_id username friends blocked");
+        let friend = await Accounts.find({ "username": friendname }).select("-_id username friends blocked");
+        user = user[0];
+        friend = friend[0];
+
+        if (user.blocked.includes(friendname) && friend.blocked.includes(username)) {
+            return res.status(401).json(`Not allowed`)
+        }
+
+        else if (!user.friends.includes(friendname)
+            || !friend.friends.includes(username)
+            || !friend || !user) {
+            return res.status(401).json(`Not allowed`)
+        }
+
+        res.send(friend.friends);
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+});
+
+// Route description : Block a user
+router.put('/block/:userToBeBlocked', getProfile, async (req, res) => {
+
+    const userID = await req.user.id;
+    const userToBeBlocked = req.params.userToBeBlocked;
+    try {
+        // Find user in the database
+        let user = await Accounts.findById(userID);
+        const userExits = await Accounts.exists({ "username": userToBeBlocked });
+
+        if (!userExits) { return res.status(404).json(`No user with username @${userToBeBlocked} exists in the database.`) };
+
+        if (user.blocked.includes(userToBeBlocked)) { return res.json(`You have already blocked@ ${userToBeBlocked}.`) }
+        let blocklist = { blocked: [] };
+        blocklist.blocked = blocklist.blocked.concat(user.blocked);
+        blocklist.blocked = blocklist.blocked.concat(userToBeBlocked);
+        user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: blocklist }, { new: true, useFindAndModify: false });
+        res.send(user);
+        console.log("worked till here");
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+});
+
+// Route description : unBlock a user
+router.put('/unblock/:userToBeUnBlocked', getProfile, async (req, res) => {
+
+    const userID = await req.user.id;
+    const userToBeUnBlocked = req.params.userToBeUnBlocked;
+    try {
+        // Find user in the database
+        let user = await Accounts.findById(userID);
+
+        if (!user.blocked.includes(userToBeUnBlocked)) { return res.json(`Account @${userToBeUnBlocked} is not in your blocklist.`) }
+
+        function unBlock(account) {
+            return account != userToBeUnBlocked;
+        }
+
+        let blocklist = { blocked: [] };
+        blocklist.blocked = blocklist.blocked.concat(user.blocked);
+        blocklist.blocked = blocklist.blocked.filter(unBlock);
+
+        user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: blocklist }, { new: true, useFindAndModify: false });
+        console.log("worked till here");
+        res.send(user);
+
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+});
 
 module.exports = router
