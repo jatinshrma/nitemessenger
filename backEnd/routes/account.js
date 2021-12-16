@@ -111,10 +111,21 @@ router.post('/login',
 );
 
 // Route description : Get all users from database.
-router.get('/users', async (req, res) => {
+router.get('/users', getProfile, async (req, res) => {
 
     try {
-        const user = await Accounts.find().select("-password")
+        const users = await Accounts.find().select("-_id dp_id username name")
+        res.send(users);
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+});
+
+// Route description : Get user profile by username from database.
+router.post('/profile/:username', getProfile, async (req, res) => {
+
+    try {
+        const user = await Accounts.findOne({ username: req.params.username }).select("-_id dp_id username name")
         res.send(user);
     } catch (error) {
         res.status(500).json({ message: "Some error occurred", error: error.message })
@@ -134,84 +145,223 @@ router.post('/profile', getProfile, async (req, res) => {
     }
 });
 
-// Route description : Get user profile by username from database.
-router.post('/profile/:username', async (req, res) => {
+// Route description : Update user profile details into database.
+router.put('/profile/update', getProfile, async (req, res) => {
+
+    const userID = await req.user.id;
+    const { dp_id, name, bio, email } = req.body;
 
     try {
-        const user = await Accounts.findOne({ username: req.params.username }).select("-_id -password -email")
+        // Find user with entered email in database. When true, returns error
+        let user = await Accounts.findById(userID)
+
+        if (email && email !== user.email) {
+
+            let isUser = await Accounts.exists({ "email": email });
+            if (isUser) {
+                return res.status(400).json({ error: "User with this email already exists" })
+            }
+        }
+
+        if (!user) { return res.status(404).send("Not Found") }
+        if (user._id.toString() !== userID) { return res.status(401).send("Not Allowed") }
+
+        let updatedProfile = { dp_id: null, name: null, bio: null, email: null };
+
+        updatedProfile.dp_id = dp_id ? dp_id : user.dp_id;
+        updatedProfile.name = name ? name : user.name;
+        updatedProfile.bio = bio ? bio : user.bio;
+        updatedProfile.email = email ? email : user.email;
+
+        user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: updatedProfile }, { new: true, useFindAndModify: false });
         res.send(user);
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+}
+);
+
+// Route description : Request for a handshake.
+router.put('/request/:requestee', getProfile, async (req, res) => {
+
+    const userID = await req.user.id;
+    const requesteeName = req.params.requestee;
+
+    try {
+        // Find user in the database
+        let user = await Accounts.findById(userID);
+        let requestee = await Accounts.find({ "username": requesteeName }).select("requestedBy");
+        requestee = requestee[0];
+
+        if (!requestee) { return res.status(404).json(`No user with username @${requesteeName} exists in the database.`) }
+
+        if (user.friends.includes(requesteeName)) { return res.status(401).json(`You and @${requesteeName} are already friends.`) }
+
+        if (user.requested.includes(requesteeName)) { return res.status(401).json(`You have already requsted.`) }
+        if (user.blocked.includes(requesteeName)) { return res.status(401).json(`Not allowed`) }
+
+        // Updating requests list on user object
+        let requestsArray = { requested: [] };
+        requestsArray.requested = requestsArray.requested.concat(user.requested);
+        requestsArray.requested = requestsArray.requested.concat(requesteeName);
+
+        user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: requestsArray }, { new: true, useFindAndModify: false });
+
+        // Updating requestedBy list on requestee object
+        let RequesteeObj = { requestedBy: [] };
+        RequesteeObj.requestedBy = RequesteeObj.requestedBy.concat(requestee.requestedBy);
+        RequesteeObj.requestedBy = RequesteeObj.requestedBy.concat(user.username);
+
+        user = await Accounts.findOneAndUpdate({ "_id": requestee._id }, { $set: RequesteeObj }, { new: true, useFindAndModify: false });
+
+        res.json({ Message: `Requested for a handshake to @${requesteeName}` });
     } catch (error) {
         res.status(500).json({ message: "Some error occurred", error: error.message })
     }
 });
 
-// Route description : Update user profile details into database.
-router.put('/profile/update',
-
-    // Validation for each value
-    [
-        body("name", "Name can't be left empty.").exists(),
-        body("bio", "Bio is too long").isLength({ max: 150 }),
-        body("email", "Enter a valid Email").isEmail(),
-    ], getProfile, async (req, res) => {
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        const userID = await req.user.id;
-        const { dp_id, name, bio, email } = req.body;
-
-        try {
-            // Find user with entered email in database. When true, returns error
-            let user = await Accounts.findById(userID)
-            // console.log(user);
-
-            if (email !== user.email) {
-
-                let isUser = await Accounts.exists({ "email": email });
-                if (isUser) {
-                    return res.status(400).json({ error: "User with this email already exists" })
-                }
-                // console.log(user)
-            }
-
-            if (!user) { return res.status(404).send("Not Found") }
-            if (user._id.toString() !== userID) { return res.status(401).send("Not Allowed") }
-
-            let updatedProfile = { dp_id: "", name: "", bio: "", email: "" };
-            if (dp_id) { updatedProfile.dp_id = dp_id };
-            if (name) { updatedProfile.name = name };
-            if (bio) { updatedProfile.bio = bio };
-            if (email) { updatedProfile.email = email };
-
-            user = await Accounts.findOneAndUpdate({ "_id": req.user.id }, { $set: updatedProfile }, { new: true, useFindAndModify: false });
-            res.send(user);
-        } catch (error) {
-            res.status(500).json({ message: "Some error occurred", error: error.message })
-        }
-    }
-);
-
-// Route description : Add new friend.
-router.put('/handshake/:friend', getProfile, async (req, res) => {
+// Route description : Cancel request.
+router.put('/cancelrequest/:requestee', getProfile, async (req, res) => {
 
     const userID = await req.user.id;
-    const friend = req.params.friend;
+    const requesteeName = req.params.requestee;
+
     try {
         // Find user in the database
         let user = await Accounts.findById(userID);
-        const friendExits = await Accounts.exists({ "username": friend });
+        let requestee = await Accounts.find({ "username": requesteeName }).select("requestedBy");
+        requestee = requestee[0];
 
-        if (!friendExits) { return res.status(404).json(`No user with username @${friend} exists in the database.`) }
+        if (!requestee) { return res.status(404).json(`No user with username @${requesteeName} exists in the database.`) }
 
-        if (user.friends.includes(friend)) { return res.json(`You and @${friend} are already friends.`) }
+        if (user.friends.includes(requesteeName)) { return res.status(401).json(`You and @${requesteeName} are already friends.`) }
+
+        if (!user.requested.includes(requesteeName) || user.blocked.includes(requesteeName)) { return res.status(401).json(`You didnot request`) }
+
+        // Updating requests list on user object
+        function cancelRequested(username) {
+            return username != requesteeName;
+        }
+
+        let requestsArray = { requested: [] };
+        requestsArray.requested = requestsArray.requested.concat(user.requested);
+        requestsArray.requested = requestsArray.requested.filter(cancelRequested);
+
+        user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: requestsArray }, { new: true, useFindAndModify: false });
+
+        // Updating requestedBy list on requestee object
+        function removeFromRequestedBy(username) {
+            return username != user.username;
+        }
+
+        let RequesteeObj = { requestedBy: [] };
+        RequesteeObj.requestedBy = RequesteeObj.requestedBy.concat(requestee.requestedBy);
+        RequesteeObj.requestedBy = RequesteeObj.requestedBy.filter(removeFromRequestedBy);
+
+        user = await Accounts.findOneAndUpdate({ "_id": requestee._id }, { $set: RequesteeObj }, { new: true, useFindAndModify: false });
+
+        res.json({ Message: "You have cancelled your request" });
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+});
+
+// Route description : Decline request.
+router.put('/declinerequest/:requestor', getProfile, async (req, res) => {
+
+    const userID = await req.user.id;
+    const requestorName = req.params.requestor;
+
+    try {
+        // Find user in the database
+        let user = await Accounts.findById(userID);
+        let requestor = await Accounts.findOne({ username: requestorName }).select('requested');
+
+        if (!requestor.requested.includes(user.username) || user.friends.includes(requestorName) || user.blocked.includes(requestor)) {
+            return res.status(401).json(`Not allowed`)
+        };
+
+        // Removing request from requestor side
+        function declineRequest(username) {
+            return username != user.username;
+        }
+
+        let requestsArray = { requested: [] };
+        requestsArray.requested = requestsArray.requested.concat(requestor.requested);
+        requestsArray.requested = requestsArray.requested.filter(declineRequest);
+
+        requestor = await Accounts.findOneAndUpdate({ "_id": requestor._id }, { $set: requestsArray }, { new: true, useFindAndModify: false });
+
+        // Updating requestedBy on user side
+        function updateRequestedBy(username) {
+            return username != requestorName;
+        }
+
+        let requestorsArray = { requestedBy: [] };
+        requestorsArray.requestedBy = requestorsArray.requestedBy.concat(user.requestedBy);
+        requestorsArray.requestedBy = requestorsArray.requestedBy.filter(updateRequestedBy);
+
+        user = await Accounts.findOneAndUpdate({ "_id": user._id }, { $set: requestorsArray }, { new: true, useFindAndModify: false });
+
+        // res.json({ user: user.requestedBy, requestor: requestor.requested })
+        res.send({ Message: "Request has been Declined." });
+    } catch (error) {
+        res.status(500).json({ message: "Some error occurred", error: error.message })
+    }
+});
+
+// Route description : Add new friend.
+router.put('/handshake/:requestor', getProfile, async (req, res) => {
+
+    const userID = await req.user.id;
+    const requestorName = req.params.requestor;
+    try {
+        // Find user in the database
+        let user = await Accounts.findById(userID);
+        let requestor = await Accounts.findOne({ "username": requestorName }).select("friends requested");
+
+        if (!requestor) { return res.status(404).json(`No user with username @${requestorName} exists in the database.`) }
+
+        if (!requestor.requested.includes(user.username)) { return res.status(401).json(`Not allowed`) }
+
         let userFriends = { friends: [] };
         userFriends.friends = userFriends.friends.concat(user.friends);
-        userFriends.friends = userFriends.friends.concat(friend);
+        userFriends.friends = userFriends.friends.concat(requestorName);
 
-        user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: userFriends }, { new: true, useFindAndModify: false });
-        res.send(user);
+        let requestorFriends = { friends: [] };
+        requestorFriends.friends = requestorFriends.friends.concat(requestor.friends);
+        requestorFriends.friends = requestorFriends.friends.concat(user.username);
+        // Removing request from requestor side
+        function declineRequest(username) {
+            return username != user.username;
+        }
+
+        let requestsArray = { requested: [] };
+        requestsArray.requested = requestsArray.requested.concat(requestor.requested);
+        requestsArray.requested = requestsArray.requested.filter(declineRequest);
+
+        requestor = await Accounts.findOneAndUpdate({ "_id": requestor._id }, { $set: requestsArray }, { new: true, useFindAndModify: false });
+
+        // Updating requestedBy on user side
+        function updateRequestedBy(username) {
+            return username != requestorName;
+        }
+
+        let requestorsArray = { requestedBy: [] };
+        requestorsArray.requestedBy = requestorsArray.requestedBy.concat(user.requestedBy);
+        requestorsArray.requestedBy = requestorsArray.requestedBy.filter(updateRequestedBy);
+
+        user = await Accounts.findOneAndUpdate({ "_id": user._id }, { $set: requestorsArray }, { new: true, useFindAndModify: false });
+
+        if (!user.friends.includes(requestorName)) {
+            user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: userFriends }, { new: true, useFindAndModify: false });
+        }
+
+        if (!requestor.friends.includes(user.username)) {
+            requestor = await Accounts.findOneAndUpdate({ "_id": requestor._id }, { $set: requestorFriends }, { new: true, useFindAndModify: false });
+        }
+
+        res.send(`Successfully handshaked with @${requestorName}`);
     } catch (error) {
         res.status(500).json({ message: "Some error occurred", error: error.message })
     }
@@ -235,7 +385,6 @@ router.put('/goodbye/:friend', getProfile, async (req, res) => {
         let userFriends = { friends: [] };
         userFriends.friends = userFriends.friends.concat(user.friends);
         userFriends.friends = userFriends.friends.filter(unFriend);
-        console.log('worked till here.')
 
         user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: userFriends }, { new: true, useFindAndModify: false });
         res.send(user);
@@ -245,28 +394,21 @@ router.put('/goodbye/:friend', getProfile, async (req, res) => {
 });
 
 // Route description : friendlist.
-router.get('/friendlist/:user/:friend', async (req, res) => {
+router.get('/friendlist/:friend', getProfile, async (req, res) => {
 
-    const username = req.params.user;
+    const userID = req.user.id;
     const friendname = req.params.friend;
     try {
         // Find user in the database
-        let user = await Accounts.find({ "username": username }).select("-_id username friends blocked");
-        let friend = await Accounts.find({ "username": friendname }).select("-_id username friends blocked");
-        user = user[0];
-        friend = friend[0];
+        let user = await Accounts.findById(userID).select("-_id username friends blocked");
+        let friend = await Accounts.findOne({ "username": friendname }).select("-_id friends");
 
-        if (user.blocked.includes(friendname) && friend.blocked.includes(username)) {
-            return res.status(401).json(`Not allowed`)
-        }
-
-        else if (!user.friends.includes(friendname)
-            || !friend.friends.includes(username)
-            || !friend || !user) {
-            return res.status(401).json(`Not allowed`)
-        }
-
-        res.send(friend.friends);
+        if (!friend)
+            res.status(401).json("Not allowed");
+        else if (friend.friends.includes(user.username))
+            res.send(friend.friends);
+        else
+            res.status(401).json("Not allowed");
     } catch (error) {
         res.status(500).json({ message: "Some error occurred", error: error.message })
     }
@@ -276,21 +418,32 @@ router.get('/friendlist/:user/:friend', async (req, res) => {
 router.put('/block/:userToBeBlocked', getProfile, async (req, res) => {
 
     const userID = await req.user.id;
-    const userToBeBlocked = req.params.userToBeBlocked;
+    const userToBeBlockedName = req.params.userToBeBlocked;
     try {
         // Find user in the database
         let user = await Accounts.findById(userID);
-        const userExits = await Accounts.exists({ "username": userToBeBlocked });
+        let userToBeBlocked = await Accounts.find({ "username": userToBeBlockedName }).select("blockedBy");
+        userToBeBlocked = userToBeBlocked[0];
 
-        if (!userExits) { return res.status(404).json(`No user with username @${userToBeBlocked} exists in the database.`) };
+        if (!userToBeBlocked) { return res.status(404).json(`No user with username @${userToBeBlockedName} exists in the database.`) };
 
-        if (user.blocked.includes(userToBeBlocked)) { return res.json(`You have already blocked@ ${userToBeBlocked}.`) }
+        if (user.blocked.includes(userToBeBlockedName)) { return res.json(`You have already blocked@ ${userToBeBlockedName}.`) }
+
+        // Blocking user on user side
         let blocklist = { blocked: [] };
         blocklist.blocked = blocklist.blocked.concat(user.blocked);
-        blocklist.blocked = blocklist.blocked.concat(userToBeBlocked);
+        blocklist.blocked = blocklist.blocked.concat(userToBeBlockedName);
+
         user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: blocklist }, { new: true, useFindAndModify: false });
-        res.send(user);
-        console.log("worked till here");
+
+        // Updating blocked user's blockedBy list
+        let blockedUser = { blockedBy: [] };
+        blockedUser.blockedBy = blockedUser.blockedBy.concat(userToBeBlocked.blockedBy);
+        blockedUser.blockedBy = blockedUser.blockedBy.concat(user.username);
+
+        blockedUser = await Accounts.findOneAndUpdate({ "_id": userToBeBlocked._id }, { $set: blockedUser }, { new: true, useFindAndModify: false })
+
+        res.send(`successfully blocked @${userToBeBlockedName}`);
     } catch (error) {
         res.status(500).json({ message: "Some error occurred", error: error.message })
     }
@@ -300,25 +453,39 @@ router.put('/block/:userToBeBlocked', getProfile, async (req, res) => {
 router.put('/unblock/:userToBeUnBlocked', getProfile, async (req, res) => {
 
     const userID = await req.user.id;
-    const userToBeUnBlocked = req.params.userToBeUnBlocked;
+    const userToBeUnBlockedName = req.params.userToBeUnBlocked;
     try {
         // Find user in the database
         let user = await Accounts.findById(userID);
+        let userToBeUnblocked = await Accounts.find({ "username": userToBeUnBlockedName }).select("blockedBy");
+        userToBeUnblocked = userToBeUnblocked[0];
 
-        if (!user.blocked.includes(userToBeUnBlocked)) { return res.json(`Account @${userToBeUnBlocked} is not in your blocklist.`) }
+        if (!userToBeUnblocked) { return res.status(404).json(`No user with username @${userToBeUnBlockedName} exists in the database.`) };
 
-        function unBlock(account) {
-            return account != userToBeUnBlocked;
+        if (!user.blocked.includes(userToBeUnBlockedName) && !userToBeUnblocked.blockedBy.includes(user.username)) { return res.json(`You have not blocked @${userToBeUnBlockedName}.`) };
+
+        function unBlock(username) {
+            return username != userToBeUnBlockedName;
         }
 
+        // Blocking user on user side
         let blocklist = { blocked: [] };
         blocklist.blocked = blocklist.blocked.concat(user.blocked);
         blocklist.blocked = blocklist.blocked.filter(unBlock);
 
         user = await Accounts.findOneAndUpdate({ "_id": userID }, { $set: blocklist }, { new: true, useFindAndModify: false });
-        console.log("worked till here");
-        res.send(user);
 
+        // Updating blocked user's blockedBy list
+        function removeFromBlockedBy(username) {
+            return username != user.username;
+        }
+        let blockedUser = { blockedBy: [] };
+        blockedUser.blockedBy = blockedUser.blockedBy.concat(userToBeUnblocked.blockedBy);
+        blockedUser.blockedBy = blockedUser.blockedBy.filter(removeFromBlockedBy);
+
+        blockedUser = await Accounts.findOneAndUpdate({ "_id": userToBeUnblocked._id }, { $set: blockedUser }, { new: true, useFindAndModify: false })
+
+        res.send(`successfully blocked @${userToBeUnBlockedName}`);
     } catch (error) {
         res.status(500).json({ message: "Some error occurred", error: error.message })
     }

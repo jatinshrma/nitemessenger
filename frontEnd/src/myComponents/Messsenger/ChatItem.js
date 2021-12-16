@@ -1,6 +1,5 @@
 import React from 'react'
 import './Messenger.css'
-// import doticon from '../img/3dots.svg'
 
 const ChatItem = (props) => {
     const { msg, chatClass, showStatus, chat, date, messageStatus } = props;
@@ -31,7 +30,6 @@ const ChatItem = (props) => {
                 </div>
             </div>
             {showStatus && <div id="messageStatus">{messageStatus ? "seen" : chat.status}</div>}
-            {/* {messageStatus && <div id="messageStatus">seen</div>} */}
         </div>
     )
 }

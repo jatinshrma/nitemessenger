@@ -1,19 +1,17 @@
-import React, { useEffect, useContext, useState, useRef } from 'react';
-import { useHistory, useLocation } from "react-router-dom";
+import React, { useEffect, useContext, useState } from 'react';
 import queryString from 'query-string';
-import { io } from 'socket.io-client'
+import { useHistory, useLocation } from "react-router-dom";
 
 // Importing components
-import './Home.css';
 import TabsBar from './TabsBar';
 import Navbar from './HomeNavbar';
-import Contact from './Contact'
+import ExploreContact from './ExploreContact';
 
 // Importing contexts
 import userContext from "../context/authenticate/userContext";
 import circleContext from "../context/friendcirle/circleContext";
 
-const ContactsList = () => {
+const Explore = () => {
 
     const user_Context = useContext(userContext);
     const { getProfile } = user_Context;
@@ -21,33 +19,21 @@ const ContactsList = () => {
     const circle_Context = useContext(circleContext);
     const { users, fetchUsers } = circle_Context;
 
-    // Clear stored date in session storage
-    sessionStorage.removeItem('date')
-
-    // Refs
-    let socket = useRef();
-
-    useEffect(() => {
-
-        socket.current = io(process.env.REACT_APP_SOCKET);
-        socket.current.emit("addUser", user);
-
-        socket.current.on("getUsers", users => {
-        });
-
-        socket.current.on("disconnect", () => {
-        });
-        // eslint-disable-next-line
-    }, [])
-
-    const [seachInput, setSeachInput] = useState("");
-    const [accountUser, setAccountUser] = useState("");
     const history = useHistory();
     const location = useLocation();
 
     // Extract friend's username from the url
     const params = queryString.parse(location.search);
     const user = params.user
+
+    const Token = localStorage.getItem(user)
+    if (!Token) {
+        history.push('/login');
+    }
+
+    // States
+    const [seachInput, setSeachInput] = useState("");
+    const [accountUser, setAccountUser] = useState("");
 
     useEffect(() => {
         async function func() {
@@ -60,14 +46,9 @@ const ContactsList = () => {
         // eslint-disable-next-line
     }, []);
 
-    const Token = localStorage.getItem(user)
-    if (!Token) {
-        history.push('/login');
-    }
 
-    const urlparam = history.location.search;
     return (
-        <>
+        <div>
             <Navbar user={user} />
             <TabsBar user={user} />
             <div id="home-search-div">
@@ -79,11 +60,13 @@ const ContactsList = () => {
                 <ul className="d-block m-0 p-0">
 
                     {!seachInput && users.map(element => {
-                        if (accountUser && accountUser.friends.includes(element.username)) {
-                            return <Contact key={element.username} user={element} params={urlparam} currentUser={user} accountUser={accountUser} />;
+                        if (accountUser && !accountUser.friends.includes(element.username)
+                            && !accountUser.requested.includes(element.username)
+                            && !accountUser.requestedBy.includes(element.username)) {
+                            return <ExploreContact key={element.username} user={element} currentUser={user} />;
                         }
                         else {
-                            return null;
+                            return null
                         }
                     })}
 
@@ -91,12 +74,14 @@ const ContactsList = () => {
                         let name = element.name.toLowerCase();
                         let username = element.username.toLowerCase();
                         let search = seachInput.toLowerCase();
-                        if (accountUser && accountUser.friends.includes(element.username)) {
+                        if (accountUser && !accountUser.friends.includes(element.username)
+                            && !accountUser.requested.includes(element.username)
+                            && !accountUser.requestedBy.includes(element.username)) {
+
                             if (name.includes(search) || username.includes(search))
-                                return <Contact key={element.username} user={element} params={urlparam} />;
-                            else {
+                                return <ExploreContact key={element.username} user={element} currentUser={user} />;
+                            else
                                 return null;
-                            }
                         }
                         else {
                             return null;
@@ -104,8 +89,8 @@ const ContactsList = () => {
                     })}
                 </ul>
             </div>
-        </>
+        </div>
     )
 }
 
-export default ContactsList
+export default Explore

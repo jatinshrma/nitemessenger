@@ -25,6 +25,17 @@
 }
 
 /* Contact-Menu */
+#addIco {
+    width: 27px;
+    position: relative;
+    right: 15px;
+    margin: auto 0;
+    transition: all .2s;
+}
+
+#addIco:hover {
+    width: 33px;
+}
 
 #menu-dots {
     box-sizing: border-box;
@@ -58,9 +69,15 @@
     background-color: rgb(184, 0, 0);
 }
 
-#cmItem:hover {
+.cmItem:hover {
     color: white;
     background-color: black;
+}
+
+.btn {
+    font-size: 18px;
+    border-radius: 5px;
+    margin: 10px !important;
 }
 
 /* --------------------- Search-bar --------------------- */
@@ -68,12 +85,12 @@
 #home-search-input {
     padding: 13px 20px;
     border-radius: 0;
-    background: #151419;
+    background: #0f0e13;
 }
 
 #home-search-input:focus {
     background-color: #050507;
-    transition: background .3s ease-in;
+    transition: background .4s ease-in;
 }
 
 /* --------------------- Tabs-bar --------------------- */
@@ -104,7 +121,18 @@
 }
 
 #mid-tab {
-    border-right: .6px solid #525252;
+    border-left: 1px solid #a6a6ab;
+    border-right: 1px solid #a6a6ab;
+}
+
+.requestsTab span {
+    color: #a6a6ab;
+    font-size: 16px;
+    padding: 0 15px;
+}
+
+.requestsTab img {
+    width: 20px;
 }
 
 /* --------------------- Profile-Page --------------------- */
@@ -167,58 +195,86 @@
     div, h5, p {
         font-size: 16px;
     }
+
     #home-search-input {
         font-size: small;
         padding: 13px 20px;
         border-radius: 0;
-        background: #151419;
     }
+
     .navbar {
         padding: 0;
     }
+
     .navbar-brand {
         padding: 5px 0;
         font-size: 1rem;
     }
+
     .btn {
-        border-radius: 20px;
-        margin: 10px!important;
+        font-size: 13px;
+        border-radius: 5px;
+        margin: 10px !important;
     }
+
     #contact-dpContainer {
         width: 40px;
         height: 40px;
     }
+
     #menu-dots>div>img {
-        width: 25px!important;
+        width: 25px !important;
     }
+
     .tabs {
         padding: 10px 0;
     }
+
     .tabsIco {
-        height: 20px;
+        height: 18px;
     }
+
+    #mid-tab {
+        border: none;
+    }
+
     .list-group-item {
         align-items: center;
         padding: 5px 8px;
     }
+
     .card-body {
         padding: 5px;
     }
+
     .list-value-bio {
         font-size: 14px;
         padding: 0;
     }
+
     .list-values>input, .bio-textarea {
-        padding: 5px 5px!important;
+        padding: 5px 5px !important;
         font-size: 14px;
     }
+
     #bio-length {
         font-size: 13px;
     }
+
     #contactMenu * {
         font-size: 14px;
     }
-    .dropdown-menu{
+
+    .requestsTab span {
+        font-size: 13px;
+        padding: 0 6px;
+    }
+
+    .requestsTab img {
+        width: 16px;
+    }
+
+    .dropdown-menu {
         min-width: 5rem;
     }
 }

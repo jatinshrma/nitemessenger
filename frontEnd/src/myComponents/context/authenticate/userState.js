@@ -7,7 +7,7 @@ const UserState = (props) => {
     const host = process.env.REACT_APP_SERVER;
     const [profile, setProfile] = useState('');
 
-    // Login User
+    // ----------------- Login User -----------------
     const login = async (credentials) => {
 
         const response = await fetch(`${host}/accounts/login`, {
@@ -21,7 +21,7 @@ const UserState = (props) => {
         const data = await response.json();
         if (data.Token) {
             localStorage.setItem(credentials.username, data.Token);
-            localStorage.setItem("user", credentials.username );
+            localStorage.setItem("user", credentials.username);
             return true;
         }
         else {
@@ -30,7 +30,22 @@ const UserState = (props) => {
         }
     }
 
-    // Fetch user's profile
+
+    // ----------------- Signup -----------------
+    const signup = async (data) => {
+
+        const response = await fetch(`${host}/accounts/signup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        return response.json();
+    };
+
+
+    // ----------------- Fetch user's profile -----------------
     const getProfile = async (user) => {
 
         const response = await fetch(`${host}/accounts/profile`, {
@@ -42,9 +57,11 @@ const UserState = (props) => {
         })
         const data = await response.json();
         setProfile(data);
+        return data;
     }
 
-    // Upload image
+
+    // ----------------- Upload image -----------------
     const [imageResponse, setImageResponse] = useState("");
     const uploadPicture = async (file) => {
 
@@ -61,7 +78,8 @@ const UserState = (props) => {
             })
     }
 
-    // Get image file.
+
+    // ----------------- Get image file -----------------
     const getImageFile = async (filename) => {
         const response = await fetch(`${host}/dp/files/${filename}`, {
             method: 'GET',
@@ -73,17 +91,16 @@ const UserState = (props) => {
         return data
     }
 
-    // Delete image
+
+    // ----------------- Delete image -----------------
     const deletePicture = async (id) => {
         axios
             .delete(`${host}/dp/files/${id}`)
-            .then((res) => {
-                console.log(res.data);
-            })
             .catch((err) => {
                 console.log(err);
             })
     }
+
 
     // ----------------- Update user's profile -----------------
     const updateProfile = async (data, user) => {
@@ -99,22 +116,14 @@ const UserState = (props) => {
         await response.json();
     }
 
-    // ----------------- Signup -----------------
-    const signup = async (data) => {
-
-        const response = await fetch(`${host}/accounts/signup`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        return response.json();
-    }
-
     return (
 
-        <UserContext.Provider value={{ signup, login, profile, getProfile, updateProfile, uploadPicture, imageResponse, getImageFile, deletePicture }}>
+        <UserContext.Provider value={{
+            signup, login,
+            profile, setProfile, getProfile, updateProfile,
+            uploadPicture, deletePicture,
+            imageResponse, getImageFile
+        }}>
             {props.children}
         </UserContext.Provider>
     )

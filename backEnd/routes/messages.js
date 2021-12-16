@@ -39,7 +39,17 @@ router.post('/sendmessage/:username', getProfile,
 
         const username = await Accounts.exists({ username: req.params.username })
         if (!username) {
-            return res.status(404).json({ error: "This application doesn't send messsages to ghosts, pass a valid friend's username." })
+            return res.status(404).json({ error: "Pass a valid friend's username." })
+        }
+
+        const accountHolder = await Accounts.findById(req.user.id);
+
+        if (accountHolder.blocked.includes(req.params.username)) {
+            return res.status(401).json({ error: "Not allowed" })
+        }
+
+        if (!username) {
+            return res.status(404).json({ error: "Pass a valid friend's username." })
         }
 
         let { message } = await req.body;
@@ -53,7 +63,6 @@ router.post('/sendmessage/:username', getProfile,
                 message: message,
                 status: status,
             })
-            console.log("worked till here.");
             res.send(message);
         } catch (err) {
             res.json({ error: err.message })
@@ -87,7 +96,6 @@ router.put('/status/:status', getProfile, async (req, res) => {
         if (!message) { return res.status(404).send("Not Found") }
 
         let user = await Accounts.findById(userID).select("-_id username")
-        console.log(user);
 
         if (user.username !== message.receiver) { return res.status(401).send("Not Allowed") }
         else {
