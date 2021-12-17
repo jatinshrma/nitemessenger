@@ -178,11 +178,11 @@ aside.emoji-picker-react {
 
 /* --------------------- Typing-dots --------------------- */
 
-.dots-cont {
-   position: fixed;
+/* .dots-cont { */
+   /* position: fixed;
    bottom: 58px;
    width: 100%;
-}
+} */
 
 .dot {
    width: 12px;
