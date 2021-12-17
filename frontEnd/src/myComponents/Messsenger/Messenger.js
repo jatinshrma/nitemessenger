@@ -79,6 +79,7 @@ const Messenger = (props) => {
 
         socket.current.on("isFriendTyping", (isTyping) => {
             setIsTyping(isTyping);
+            window.scrollTo(0, window.document.body.scrollHeight);
         });
 
         // Fetch Messeges
