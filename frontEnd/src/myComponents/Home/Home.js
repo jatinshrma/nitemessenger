@@ -14,7 +14,7 @@ import userContext from "../context/authenticate/userContext";
 import circleContext from "../context/friendcirle/circleContext";
 
 const ContactsList = () => {
-
+    
     const user_Context = useContext(userContext);
     const { getProfile } = user_Context;
 
@@ -31,7 +31,7 @@ const ContactsList = () => {
 
         socket.current = io(process.env.REACT_APP_SOCKET);
         socket.current.emit("addUser", user);
-
+        
         socket.current.on("getUsers", users => {
         });
 
@@ -39,12 +39,12 @@ const ContactsList = () => {
         });
         // eslint-disable-next-line
     }, [])
-
+    
     const [seachInput, setSeachInput] = useState("");
     const [accountUser, setAccountUser] = useState("");
     const history = useHistory();
     const location = useLocation();
-
+    
     // Extract friend's username from the url
     const params = queryString.parse(location.search);
     const user = params.user

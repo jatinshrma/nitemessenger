@@ -1,6 +1,7 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext, useState, useRef } from 'react';
 import queryString from 'query-string';
 import { useHistory, useLocation } from "react-router-dom";
+import { io } from 'socket.io-client'
 
 // Importing components
 import TabsBar from './TabsBar';
@@ -12,6 +13,15 @@ import userContext from "../context/authenticate/userContext";
 import circleContext from "../context/friendcirle/circleContext";
 
 const Explore = () => {
+    // Refs
+    let socket = useRef();
+    useEffect(() => {
+
+        socket.current = io(process.env.REACT_APP_SOCKET);
+        socket.current.emit("addUser", user);
+
+        // eslint-disable-next-line
+    }, [])
 
     const user_Context = useContext(userContext);
     const { getProfile } = user_Context;

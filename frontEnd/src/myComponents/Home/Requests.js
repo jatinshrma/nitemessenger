@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext, useState, useRef } from 'react';
 import queryString from 'query-string';
 import { useHistory, useLocation } from "react-router-dom";
 
@@ -11,12 +11,21 @@ import sentIco from '../img/upload.svg'
 // Importing contexts
 import userContext from "../context/authenticate/userContext";
 import circleContext from "../context/friendcirle/circleContext";
+import { io } from 'socket.io-client'
 
 // Importing components
 import ExploreContact from './ExploreContact';
-
 const Requests = () => {
 
+    // Refs
+    let socket = useRef();
+    useEffect(() => {
+
+        socket.current = io(process.env.REACT_APP_SOCKET);
+        socket.current.emit("addUser", user);
+
+        // eslint-disable-next-line
+    }, [])
     const user_Context = useContext(userContext);
     const { getProfile } = user_Context;
 

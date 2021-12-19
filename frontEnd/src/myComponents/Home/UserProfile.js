@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useHistory } from "react-router-dom";
 import userContext from '../context/authenticate/userContext';
 import queryString from 'query-string';
 import TabsBar from './TabsBar';
 import "./Home.css";
+import { io } from 'socket.io-client'
 
 const UserProfile = () => {
 
@@ -11,6 +12,16 @@ const UserProfile = () => {
     const history = useHistory();
     const urlparam = history.location.search;
     const param = queryString.parse(urlparam);
+
+    // Refs
+    let socket = useRef();
+    useEffect(() => {
+
+        socket.current = io(process.env.REACT_APP_SOCKET);
+        socket.current.emit("addUser", param.user);
+        // eslint-disable-next-line
+    }, [])
+
 
     const Token = localStorage.getItem(param.user)
     if (!Token) {

@@ -189,6 +189,11 @@
     display: none;
 }
 
+.dropdown-item:focus, .dropdown-item:hover {
+    color: #1e2125;
+    background-color: #000000;
+}
+
 /* RESPONSIVE SCREEN STYLING */
 
 @media screen and (max-width: 480px) {
